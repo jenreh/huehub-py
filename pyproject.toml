@@ -26,7 +26,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-xmpp = ["slixmpp>=1.8"]
 dev = [
     "bump-my-version==1.3.0",
     "detect-secrets==1.5.0",
