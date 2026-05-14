@@ -8,7 +8,8 @@ from huehub.config import HueConfig, _apply_toml, load_config, save_config
 
 
 class TestLoadConfig:
-    def test_defaults(self) -> None:
+    def test_defaults(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("HUE_CONFIG_DIR", str(tmp_path))
         cfg = load_config()
         assert cfg.bridge.host is None
         assert cfg.tls.mode == "auto"

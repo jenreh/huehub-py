@@ -194,9 +194,10 @@ def setup(
     host: Annotated[str, typer.Option("--host", help="Bridge IP/hostname.")],
     port: Annotated[int, typer.Option(help="Bridge TLS port.")] = 443,
 ) -> None:
-    """Extract TLS certificate and register an application key.
+    """Extract and save the bridge TLS certificate.
 
-    Press the link button on the bridge when prompted.
+    After running this command, press the link button on the bridge
+    and then run ``hue authenticate``.
     """
 
     async def _do() -> None:
@@ -205,7 +206,6 @@ def setup(
         cfg = load_config(host=host)
         cfg.bridge.host = host
 
-        # Step 1 – TLS certificate
         _err.print(f"[cyan]Extracting TLS certificate from {host}:{port}…[/cyan]")
         try:
             cert_path = save_cert(host, cfg.bridge.bridge_id or "default", port)
@@ -217,17 +217,9 @@ def setup(
             )
             cfg.tls.mode = "skip"
 
-        # Step 2 – Application key
-        _err.print("[cyan]Press the link button on your Hue Bridge NOW…[/cyan]")
-        from huehub.client import HueBridgeClient
-
-        async with HueBridgeClient(cfg) as client:
-            app_key = await client.authenticate()
-
-        cfg.bridge.application_key = app_key
         save_config(cfg)
-        _err.print(f"[green]Setup complete! Application key: {app_key}[/green]")
-        _err.print(f"[green]Config saved to {cfg.config_path}[/green]")
+        _err.print("[cyan]Press the link button on your Hue Bridge NOW…[/cyan]")
+        _err.print("[cyan]Then run: hue authenticate[/cyan]")
 
     _run(_do())
 
@@ -239,15 +231,20 @@ def authenticate(
     """Register a new application key (press link button first)."""
 
     async def _do() -> None:
-        cfg = load_config(host=host or _host)
-        _err.print("[cyan]Press the link button on your Hue Bridge NOW…[/cyan]")
         from huehub.client import HueBridgeClient
+
+        cfg = load_config(host=host or _host)
+        # Use skip TLS for initial auth: the saved cert is a leaf cert and
+        # cannot serve as a CA for httpx verification (bootstrap problem).
+        cfg.tls.mode = "skip"
 
         async with HueBridgeClient(cfg) as client:
             app_key = await client.authenticate()
 
-        cfg.bridge.application_key = app_key
-        save_config(cfg)
+        # Reload config to restore the TLS mode saved by `setup`.
+        final_cfg = load_config(host=host or _host)
+        final_cfg.bridge.application_key = app_key
+        save_config(final_cfg)
         _err.print(f"[green]Application key registered: {app_key}[/green]")
 
     _run(_do())

@@ -241,7 +241,7 @@ def parse_scene(raw: dict) -> Scene:
     meta = raw.get("metadata") or {}
     group = raw.get("group") or {}
     status = raw.get("status") or {}
-    speed = (raw.get("speed") or {}).get("speed")
+    speed = raw.get("speed")  # float or None – not a nested dict
 
     return Scene(
         id=raw.get("id", ""),

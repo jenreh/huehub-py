@@ -35,6 +35,14 @@
                 "harmony-mcp"
             ],
             "cwd": "/Users/jens/Workspace/projekte/harmonyhub-py"
+        },
+        "huehub": {
+            "command": "uv",
+            "args": [
+                "run",
+                "hue-mcp"
+            ],
+            "cwd": "/Users/jens/Workspace/projekte/huehub-py"
         }
     }
 }

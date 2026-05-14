@@ -88,6 +88,19 @@ def save_cert(host: str, bridge_id: str, port: int = 443) -> Path:
     return path
 
 
+def _pinned_ssl_ctx(cert_file: Path) -> ssl.SSLContext:
+    """Return an SSL context that trusts *cert_file* and skips hostname checks.
+
+    Hue bridges present a cert whose SAN contains the bridge-ID hostname
+    (e.g. ``c42996fffec629f5.local``), not the IP address used to reach them.
+    Disabling hostname checking allows connection by IP while still enforcing
+    that the server presents the exact certificate we pinned during setup.
+    """
+    ctx = ssl.create_default_context(cafile=str(cert_file))
+    ctx.check_hostname = False
+    return ctx
+
+
 def make_httpx_client(
     host: str,
     bridge_id: str,
@@ -121,12 +134,12 @@ def make_httpx_client(
                 "Run 'hue setup' first."
             )
         log.debug("Using stored certificate %s", cert_file)
-        return httpx.AsyncClient(verify=str(cert_file), timeout=timeout)
+        return httpx.AsyncClient(verify=_pinned_ssl_ctx(cert_file), timeout=timeout)
 
     # mode == AUTO
     if cert_file.exists():
         log.debug("AUTO mode: using stored certificate %s", cert_file)
-        return httpx.AsyncClient(verify=str(cert_file), timeout=timeout)
+        return httpx.AsyncClient(verify=_pinned_ssl_ctx(cert_file), timeout=timeout)
 
     log.warning(
         "AUTO mode: no certificate for bridge %s, falling back to skip", bridge_id
