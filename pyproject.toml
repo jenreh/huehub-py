@@ -1,12 +1,12 @@
 [project]
 name = "huehub-py"
-version = "0.2.1"
-description = "Local control of the Logitech Harmony Hub: library, CLI, and MCP server"
+version = "0.1.0"
+description = "Local control of the Philips Hue Bridge via CLIP API v2: library, CLI, and MCP server"
 readme = "README.md"
 requires-python = ">=3.14"
 license = { text = "MIT" }
 authors = [{ name = "Jens Rehpöhler" }]
-keywords = ["harmony", "logitech", "smart-home", "mcp", "websocket"]
+keywords = ["hue", "philips-hue", "smart-home", "mcp", "clip-api"]
 classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
@@ -17,11 +17,12 @@ classifiers = [
 
 dependencies = [
     "httpx==0.28.1",
-    "websockets==16.0",
     "typer==0.25.1",
     "pydantic==2.13.4",
     "fastmcp==3.2.4",
-    "python-dotenv==1.2.2",
+    "httpx-sse==0.4.3",
+    "zeroconf==0.148.0",
+    "platformdirs==4.9.6",
 ]
 
 [project.optional-dependencies]
@@ -38,8 +39,8 @@ dev = [
 ]
 
 [project.scripts]
-harmony = "huehub.cli:app"
-harmony-mcp = "huehub.mcp_server:main"
+hue = "huehub.cli:app"
+hue-mcp = "huehub.mcp_server:main"
 
 [project.urls]
 Homepage = "https://github.com/jenreh/huehub-py"
