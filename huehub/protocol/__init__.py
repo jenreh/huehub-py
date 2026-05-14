@@ -1,0 +1,1 @@
+"""huehub protocol sub-package."""
