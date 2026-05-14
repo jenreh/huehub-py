@@ -75,7 +75,7 @@ exclude = [
 
 [tool.bumpversion]
 commit = false
-current_version = "0.2.1"
+current_version = "0.3.0"
 tag = false
 allow-dirty = false
 
