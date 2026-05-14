@@ -4,8 +4,8 @@ version: "3"
 silent: true
 
 vars:
-  PROJECT: Alloq
-  IMAGE_NAME: alloq
+  PROJECT: huehub-py
+  IMAGE_NAME: huehub-py
   RUNNER: uv run
 
 tasks:

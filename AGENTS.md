@@ -100,6 +100,10 @@ Prefer official docs; widen via web search for cross-version issues.
 
 ### Learn → write to **Memory**
 
+### Dependencies
+
+- add dependencies always be using `uv add <library name>`
+
 ---
 
 ## 5) Python Code & Testing
