@@ -237,6 +237,56 @@ Run `hue setup` to extract and pin the bridge certificate. The certificate is st
 
 ---
 
+## Agent skill
+
+`skill/huehub/SKILL.md` follows the [Agent Skills open standard](https://agentskills.io) and works across GitHub Copilot (VS Code, CLI, cloud agent), Claude Code, OpenAI Codex, and Cursor — write once, use everywhere.
+
+### Skill installation
+
+Each agent scans well-known directories for `SKILL.md` files automatically — no configuration required.
+
+**Project skill** (available in one repository):
+
+```bash
+# pick whichever path matches your primary agent
+cp -r skill/huehub /your-project/.agents/skills/huehub    # generic / Copilot
+cp -r skill/huehub /your-project/.github/skills/huehub    # Copilot recommended
+cp -r skill/huehub /your-project/.claude/skills/huehub    # Claude Code
+
+# symlink keeps it in sync with this repo
+ln -s "$(pwd)/skill/huehub" /your-project/.agents/skills/huehub
+```
+
+**Personal skill** (available in every project on your machine):
+
+```bash
+cp -r skill/huehub ~/.agents/skills/huehub      # generic / Copilot
+cp -r skill/huehub ~/.claude/skills/huehub      # Claude Code
+cp -r skill/huehub ~/.copilot/skills/huehub     # Copilot only
+
+ln -s "$(pwd)/skill/huehub" ~/.agents/skills/huehub   # or symlink
+```
+
+> [!TIP]
+> If you cloned huehub-py, the skill is already present as a project skill in `.agents/skills/huehub` — no extra step needed.
+
+### What it does
+
+The skill maps natural-language phrases to MCP tool calls or `hue` CLI commands automatically:
+
+| Intent | Example utterance |
+| --- | --- |
+| Turn room on/off | "Wohnzimmer einschalten", "turn off the bedroom" |
+| Set brightness | "Küche auf 40 %", "dim the office to 20" |
+| Set colour / temperature | "Flur warm weiß", "living room blue" |
+| Activate scene | "Relax im Büro", "activate Concentrate in the kitchen" |
+| Ad-hoc mood | "Regenbogen im Flur", "sunset vibe in the lounge" |
+| All lights off | "Alles aus", "turn everything off" |
+
+MCP tools are used when the server is running; the skill falls back to the `hue` CLI automatically.
+
+---
+
 ## Development
 
 ```bash
