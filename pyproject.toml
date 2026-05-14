@@ -1,6 +1,6 @@
 [project]
 name = "huehub-py"
-version = "0.1.0"
+version = "0.2.0"
 description = "Local control of the Philips Hue Bridge via CLIP API v2: library, CLI, and MCP server"
 readme = "README.md"
 requires-python = ">=3.14"
@@ -75,7 +75,7 @@ exclude = [
 
 [tool.bumpversion]
 commit = false
-current_version = "0.6.0"
+current_version = "0.2.0"
 tag = false
 allow-dirty = false
 
