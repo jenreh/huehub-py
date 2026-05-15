@@ -19,7 +19,7 @@ dependencies = [
     "httpx==0.28.1",
     "typer==0.25.1",
     "pydantic==2.13.4",
-    "fastmcp==3.2.4",
+    "fastmcp==3.3.0",
     "httpx-sse==0.4.3",
     "zeroconf==0.148.0",
     "platformdirs==4.9.6",
