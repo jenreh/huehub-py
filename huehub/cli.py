@@ -41,14 +41,25 @@ app = typer.Typer(
     name="hue",
     help="Control your Philips Hue Bridge from the command line.",
     no_args_is_help=True,
+    add_completion=True,
 )
-lights_app = typer.Typer(help="Manage individual lights.", no_args_is_help=True)
-rooms_app = typer.Typer(help="Manage rooms.", no_args_is_help=True)
-zones_app = typer.Typer(help="Manage zones.", no_args_is_help=True)
-scenes_app = typer.Typer(help="Manage scenes.", no_args_is_help=True)
-devices_app = typer.Typer(help="List devices.", no_args_is_help=True)
-sensors_app = typer.Typer(help="Read sensor values.", no_args_is_help=True)
-api_app = typer.Typer(help="Raw API access for debugging.", no_args_is_help=True)
+lights_app = typer.Typer(
+    help="Manage individual lights.", no_args_is_help=True, add_completion=True
+)
+rooms_app = typer.Typer(help="Manage rooms.", no_args_is_help=True, add_completion=True)
+zones_app = typer.Typer(help="Manage zones.", no_args_is_help=True, add_completion=True)
+scenes_app = typer.Typer(
+    help="Manage scenes.", no_args_is_help=True, add_completion=True
+)
+devices_app = typer.Typer(
+    help="List devices.", no_args_is_help=True, add_completion=True
+)
+sensors_app = typer.Typer(
+    help="Read sensor values.", no_args_is_help=True, add_completion=True
+)
+api_app = typer.Typer(
+    help="Raw API access for debugging.", no_args_is_help=True, add_completion=True
+)
 
 app.add_typer(lights_app, name="lights")
 app.add_typer(rooms_app, name="rooms")
