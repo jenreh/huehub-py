@@ -1,11 +1,8 @@
 # huehub
 
-> Local control of the Philips Hue Bridge via CLIP API v2 — Python library, CLI, and MCP server.
-
-[![Python](https://img.shields.io/badge/python-3.14%2B-blue)](https://www.python.org)
+![Version](https://img.shields.io/badge/version-0.3.1-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE.md)
-![Tests](https://img.shields.io/badge/tests-197%20passing-brightgreen)
-![Coverage](https://img.shields.io/badge/coverage-82%25-brightgreen)
+[![Python](https://img.shields.io/badge/python-3.14%2B-orange)](https://www.python.org)
 
 **huehub** talks directly to your bridge over HTTPS — no Philips cloud, no account, no internet required.
 
