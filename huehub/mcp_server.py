@@ -465,11 +465,13 @@ async def resource_bridge() -> str:
     info = await _get_client().get_bridge_info()
     import json
 
-    return json.dumps({
-        "host": info.host,
-        "bridge_id": info.bridge_id,
-        "name": info.name,
-    })
+    return json.dumps(
+        {
+            "host": info.host,
+            "bridge_id": info.bridge_id,
+            "name": info.name,
+        }
+    )
 
 
 @mcp.resource("hue://lights")
@@ -478,10 +480,17 @@ async def resource_lights() -> str:
     lights = await _get_client().list_lights()
     import json
 
-    return json.dumps([
-        {"id": lig.id, "name": lig.name, "on": lig.is_on, "brightness": lig.brightness}
-        for lig in lights
-    ])
+    return json.dumps(
+        [
+            {
+                "id": lig.id,
+                "name": lig.name,
+                "on": lig.is_on,
+                "brightness": lig.brightness,
+            }
+            for lig in lights
+        ]
+    )
 
 
 @mcp.resource("hue://rooms")
@@ -490,9 +499,9 @@ async def resource_rooms() -> str:
     rooms = await _get_client().list_rooms()
     import json
 
-    return json.dumps([
-        {"id": r.id, "name": r.name, "light_ids": list(r.light_ids)} for r in rooms
-    ])
+    return json.dumps(
+        [{"id": r.id, "name": r.name, "light_ids": list(r.light_ids)} for r in rooms]
+    )
 
 
 @mcp.resource("hue://zones")
@@ -501,9 +510,9 @@ async def resource_zones() -> str:
     zones = await _get_client().list_zones()
     import json
 
-    return json.dumps([
-        {"id": z.id, "name": z.name, "light_ids": list(z.light_ids)} for z in zones
-    ])
+    return json.dumps(
+        [{"id": z.id, "name": z.name, "light_ids": list(z.light_ids)} for z in zones]
+    )
 
 
 @mcp.resource("hue://scenes")
@@ -512,10 +521,12 @@ async def resource_scenes() -> str:
     scenes = await _get_client().list_scenes()
     import json
 
-    return json.dumps([
-        {"id": s.id, "name": s.name, "group_id": s.group_id, "active": s.is_active}
-        for s in scenes
-    ])
+    return json.dumps(
+        [
+            {"id": s.id, "name": s.name, "group_id": s.group_id, "active": s.is_active}
+            for s in scenes
+        ]
+    )
 
 
 @mcp.resource("hue://devices")
@@ -524,9 +535,9 @@ async def resource_devices() -> str:
     devices = await _get_client().list_devices()
     import json
 
-    return json.dumps([
-        {"id": d.id, "name": d.name, "product": d.product_name} for d in devices
-    ])
+    return json.dumps(
+        [{"id": d.id, "name": d.name, "product": d.product_name} for d in devices]
+    )
 
 
 @mcp.resource("hue://sensors")

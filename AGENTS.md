@@ -1,5 +1,7 @@
 # harmonyhub-py
 
+This implementation is based on the official Hue API V2 Spec: <https://developers.meethue.com/develop/hue-api-v2/api-reference/>
+
 ---
 
 ## 1) Golden Rules

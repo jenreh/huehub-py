@@ -248,7 +248,7 @@ def parse_scene(raw: dict) -> Scene:
         name=meta.get("name", raw.get("name", "")),
         group_id=group.get("rid", ""),
         group_type=group.get("rtype", "room"),
-        is_active=status.get("active") == "active",
+        is_active=status.get("active") in ("active", "static", "dynamic_palette"),
         speed=float(speed) if speed is not None else None,
     )
 
