@@ -268,7 +268,7 @@ class HueBridgeClient:
         Returns:
             List of :class:`~huehub.models.Light` instances.
         """
-        return list((await self.get_all_resources()).lights)
+        return sorted((await self.get_all_resources()).lights, key=lambda x: x.name)
 
     async def get_light(self, light: str) -> Light:
         """Get a single light by name or UUID.
@@ -367,7 +367,7 @@ class HueBridgeClient:
         Returns:
             List of :class:`~huehub.models.Room` instances.
         """
-        return list((await self.get_all_resources()).rooms)
+        return sorted((await self.get_all_resources()).rooms, key=lambda x: x.name)
 
     async def get_room(self, room: str) -> Room:
         """Get a single room by name or UUID.
@@ -410,7 +410,7 @@ class HueBridgeClient:
         Returns:
             List of :class:`~huehub.models.Zone` instances.
         """
-        return list((await self.get_all_resources()).zones)
+        return sorted((await self.get_all_resources()).zones, key=lambda x: x.name)
 
     async def get_zone(self, zone: str) -> Zone:
         """Get a single zone by name or UUID.
@@ -455,7 +455,7 @@ class HueBridgeClient:
         """
         scenes = list((await self.get_all_resources()).scenes)
         if not group:
-            return scenes
+            return sorted(scenes, key=lambda x: x.name)
 
         group_id: str | None = None
         try:
@@ -470,7 +470,7 @@ class HueBridgeClient:
         if not group_id:
             group_id = group  # treat as UUID directly
 
-        return [s for s in scenes if s.group_id == group_id]
+        return sorted([s for s in scenes if s.group_id == group_id], key=lambda x: x.name)
 
     async def activate_scene(self, scene: str, group: str | None = None) -> None:
         """Activate a scene by name or UUID.
@@ -502,7 +502,7 @@ class HueBridgeClient:
         Returns:
             List of :class:`~huehub.models.Device` instances.
         """
-        return list((await self.get_all_resources()).devices)
+        return sorted((await self.get_all_resources()).devices, key=lambda x: x.name)
 
     async def get_device(self, device: str) -> Device:
         """Get a single device by name or UUID.
@@ -525,19 +525,19 @@ class HueBridgeClient:
 
     async def list_motion_sensors(self) -> list[MotionSensor]:
         """List all motion sensors."""
-        return list((await self.get_all_resources()).motion_sensors)
+        return sorted((await self.get_all_resources()).motion_sensors, key=lambda x: x.name)
 
     async def list_temperature_sensors(self) -> list[TemperatureSensor]:
         """List all temperature sensors."""
-        return list((await self.get_all_resources()).temperature_sensors)
+        return sorted((await self.get_all_resources()).temperature_sensors, key=lambda x: x.name)
 
     async def list_light_level_sensors(self) -> list[LightLevelSensor]:
         """List all light level sensors."""
-        return list((await self.get_all_resources()).light_level_sensors)
+        return sorted((await self.get_all_resources()).light_level_sensors, key=lambda x: x.name)
 
     async def list_contact_sensors(self) -> list[ContactSensor]:
         """List all contact (door/window) sensors."""
-        return list((await self.get_all_resources()).contact_sensors)
+        return sorted((await self.get_all_resources()).contact_sensors, key=lambda x: x.name)
 
     # ------------------------------------------------------------------
     # Entertainment
@@ -545,7 +545,7 @@ class HueBridgeClient:
 
     async def list_entertainment_zones(self) -> list[EntertainmentZone]:
         """List all entertainment zones."""
-        return list((await self.get_all_resources()).entertainment_zones)
+        return sorted((await self.get_all_resources()).entertainment_zones, key=lambda x: x.name)
 
     # ------------------------------------------------------------------
     # Global controls
