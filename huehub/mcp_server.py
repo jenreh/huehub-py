@@ -577,7 +577,7 @@ async def resource_sensors() -> str:
 
 def main() -> None:
     """Run the MCP server using stdio transport."""
-    mcp.run(transport="stdio")
+    mcp.run(transport="stdio", show_banner=False)
 
 
 if __name__ == "__main__":
