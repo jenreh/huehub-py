@@ -261,6 +261,27 @@ def authenticate(
     _run(_do())
 
 
+
+@app.command(name="clear-cache")
+def clear_cache() -> None:
+    """Clear the cached bridge resources."""
+    import json
+
+    from huehub.cache import ResourceCache
+    from huehub.config import load_config
+
+    # Needs to match how other commands load config
+    cfg = load_config(host=_host, application_key=_app_key)
+    bridge_id = cfg.bridge.bridge_id or "default"
+    cache = ResourceCache(bridge_id)
+    cache.invalidate()
+
+    if _json_output:
+        _out.print_json(json.dumps({"success": True, "message": "Cache cleared"}))
+    else:
+        _err.print(f"[green]Cache for bridge '{bridge_id}' cleared.[/green]")
+
+
 @app.command()
 def info() -> None:
     """Show Hue Bridge information."""
@@ -346,9 +367,9 @@ def doctor() -> None:
 
         if _json_output:
             _out.print_json(
-                _json.dumps([
-                    {"check": r[0], "status": r[1], "detail": r[2]} for r in results
-                ])
+                _json.dumps(
+                    [{"check": r[0], "status": r[1], "detail": r[2]} for r in results]
+                )
             )
             return
 
@@ -393,13 +414,15 @@ def listen(
                     continue
                 if _json_output:
                     _out.print_json(
-                        _json.dumps({
-                            "type": event.type,
-                            "resource_type": event.resource_type,
-                            "resource_id": event.resource_id,
-                            "timestamp": event.timestamp,
-                            "data": event.data,
-                        })
+                        _json.dumps(
+                            {
+                                "type": event.type,
+                                "resource_type": event.resource_type,
+                                "resource_id": event.resource_id,
+                                "timestamp": event.timestamp,
+                                "data": event.data,
+                            }
+                        )
                     )
                 else:
                     _out.print(
@@ -443,16 +466,18 @@ def lights_list(
 
         if _json_output:
             _out.print_json(
-                _json.dumps([
-                    {
-                        "id": lig.id,
-                        "name": lig.name,
-                        "on": lig.is_on,
-                        "brightness": lig.brightness,
-                        "reachable": lig.is_reachable,
-                    }
-                    for lig in lights
-                ])
+                _json.dumps(
+                    [
+                        {
+                            "id": lig.id,
+                            "name": lig.name,
+                            "on": lig.is_on,
+                            "brightness": lig.brightness,
+                            "reachable": lig.is_reachable,
+                        }
+                        for lig in lights
+                    ]
+                )
             )
             return
 
@@ -568,22 +593,51 @@ def rooms_list() -> None:
 
     async def _do() -> None:
         async with _get_client() as client:
-            rooms = await client.list_rooms()
+            all_res = await client.get_all_resources()
+            rooms = sorted(all_res.rooms, key=lambda r: r.name)
+            gl_map = {gl.id: gl for gl in all_res.grouped_lights}
 
         if _json_output:
             _out.print_json(
-                _json.dumps([
-                    {"id": r.id, "name": r.name, "lights": len(r.light_ids)}
-                    for r in rooms
-                ])
+                _json.dumps(
+                    [
+                        {
+                            "id": r.id,
+                            "name": r.name,
+                            "lights": len(r.light_ids),
+                            "is_on": gl_map[r.grouped_light_id].is_on
+                            if r.grouped_light_id in gl_map
+                            else None,
+                        }
+                        for r in rooms
+                    ]
+                )
             )
             return
 
         table = Table(title="Rooms")
         table.add_column("Name")
+        table.add_column("State")
         table.add_column("Lights")
         for r in rooms:
-            table.add_row(r.name, str(len(r.light_ids)))
+            gl = gl_map.get(r.grouped_light_id)
+            is_on = getattr(gl, "is_on", None)
+
+            if is_on is None:
+                state_str = "Unknown"
+                color = "dim"
+            elif is_on:
+                state_str = "On"
+                color = "green"
+            else:
+                state_str = "Off"
+                color = "dim"
+
+            table.add_row(
+                r.name,
+                f"[{color}]{state_str}[/{color}]",
+                str(len(r.light_ids)),
+            )
         _out.print(table)
 
     _run(_do())
@@ -675,22 +729,51 @@ def zones_list() -> None:
 
     async def _do() -> None:
         async with _get_client() as client:
-            zones = await client.list_zones()
+            all_res = await client.get_all_resources()
+            zones = sorted(all_res.zones, key=lambda z: z.name)
+            gl_map = {gl.id: gl for gl in all_res.grouped_lights}
 
         if _json_output:
             _out.print_json(
-                _json.dumps([
-                    {"id": z.id, "name": z.name, "lights": len(z.light_ids)}
-                    for z in zones
-                ])
+                _json.dumps(
+                    [
+                        {
+                            "id": z.id,
+                            "name": z.name,
+                            "lights": len(z.light_ids),
+                            "is_on": gl_map[z.grouped_light_id].is_on
+                            if z.grouped_light_id in gl_map
+                            else None,
+                        }
+                        for z in zones
+                    ]
+                )
             )
             return
 
         table = Table(title="Zones")
         table.add_column("Name")
+        table.add_column("State")
         table.add_column("Lights")
         for z in zones:
-            table.add_row(z.name, str(len(z.light_ids)))
+            gl = gl_map.get(z.grouped_light_id)
+            is_on = getattr(gl, "is_on", None)
+
+            if is_on is None:
+                state_str = "Unknown"
+                color = "dim"
+            elif is_on:
+                state_str = "On"
+                color = "green"
+            else:
+                state_str = "Off"
+                color = "dim"
+
+            table.add_row(
+                z.name,
+                f"[{color}]{state_str}[/{color}]",
+                str(len(z.light_ids)),
+            )
         _out.print(table)
 
     _run(_do())
@@ -758,27 +841,54 @@ def scenes_list(
     async def _do() -> None:
         async with _get_client() as client:
             scenes = await client.list_scenes(group=room)
+            all_res = await client.get_all_resources()
+
+            group_map = {}
+            for r in all_res.rooms:
+                group_map[r.id] = r.name
+            for z in all_res.zones:
+                group_map[z.id] = z.name
+
+            # Sort scenes conceptually by Room, then Scene name
+            scenes = sorted(
+                scenes, key=lambda s: (group_map.get(s.group_id, ""), s.name)
+            )
 
         if _json_output:
             _out.print_json(
-                _json.dumps([
-                    {
-                        "id": s.id,
-                        "name": s.name,
-                        "group_id": s.group_id,
-                        "active": s.is_active,
-                    }
-                    for s in scenes
-                ])
+                _json.dumps(
+                    [
+                        {
+                            "id": s.id,
+                            "name": s.name,
+                            "group": group_map.get(s.group_id, s.group_id),
+                            "active": s.is_active,
+                        }
+                        for s in scenes
+                    ]
+                )
             )
             return
 
         table = Table(title="Scenes")
         table.add_column("Name")
-        table.add_column("Group ID")
-        table.add_column("Active")
+        table.add_column("Room/Zone")
+        table.add_column("State")
         for s in scenes:
-            table.add_row(s.name, s.group_id, "✓" if s.is_active else "")
+            group_name = group_map.get(s.group_id, "Unknown")
+
+            if s.is_active:
+                state_str = "Active"
+                color = "green"
+            else:
+                state_str = "Inactive"
+                color = "dim"
+
+            table.add_row(
+                s.name,
+                group_name,
+                f"[{color}]{state_str}[/{color}]",
+            )
         _out.print(table)
 
     _run(_do())
@@ -799,6 +909,21 @@ def activate(
     _run(_do())
 
 
+@scenes_app.command()
+def deactivate(
+    name: Annotated[str, typer.Argument()],
+    room: Annotated[str | None, typer.Option("--room")] = None,
+) -> None:
+    """Deactivate a scene."""
+
+    async def _do() -> None:
+        async with _get_client() as client:
+            await client.deactivate_scene(name, group=room)
+        _err.print(f"[green]Scene '{name}' deactivated.[/green]")
+
+    _run(_do())
+
+
 # ---------------------------------------------------------------------------
 # Devices sub-commands
 # ---------------------------------------------------------------------------
@@ -814,15 +939,17 @@ def devices_list() -> None:
 
         if _json_output:
             _out.print_json(
-                _json.dumps([
-                    {
-                        "id": d.id,
-                        "name": d.name,
-                        "product": d.product_name,
-                        "manufacturer": d.manufacturer,
-                    }
-                    for d in devices
-                ])
+                _json.dumps(
+                    [
+                        {
+                            "id": d.id,
+                            "name": d.name,
+                            "product": d.product_name,
+                            "manufacturer": d.manufacturer,
+                        }
+                        for d in devices
+                    ]
+                )
             )
             return
 
@@ -919,16 +1046,18 @@ def motion() -> None:
 
         if _json_output:
             _out.print_json(
-                _json.dumps([
-                    {
-                        "id": s.id,
-                        "name": s.name,
-                        "motion": s.motion_detected,
-                        "valid": s.motion_valid,
-                        "reachable": s.is_reachable,
-                    }
-                    for s in sensors
-                ])
+                _json.dumps(
+                    [
+                        {
+                            "id": s.id,
+                            "name": s.name,
+                            "motion": s.motion_detected,
+                            "valid": s.motion_valid,
+                            "reachable": s.is_reachable,
+                        }
+                        for s in sensors
+                    ]
+                )
             )
             return
 
@@ -957,15 +1086,17 @@ def temperature() -> None:
 
         if _json_output:
             _out.print_json(
-                _json.dumps([
-                    {
-                        "id": s.id,
-                        "name": s.name,
-                        "temp_celsius": s.temperature_celsius,
-                        "valid": s.temperature_valid,
-                    }
-                    for s in sensors
-                ])
+                _json.dumps(
+                    [
+                        {
+                            "id": s.id,
+                            "name": s.name,
+                            "temp_celsius": s.temperature_celsius,
+                            "valid": s.temperature_valid,
+                        }
+                        for s in sensors
+                    ]
+                )
             )
             return
 
@@ -994,15 +1125,17 @@ def light_level() -> None:
 
         if _json_output:
             _out.print_json(
-                _json.dumps([
-                    {
-                        "id": s.id,
-                        "name": s.name,
-                        "lux": s.light_level_lux,
-                        "valid": s.light_level_valid,
-                    }
-                    for s in sensors
-                ])
+                _json.dumps(
+                    [
+                        {
+                            "id": s.id,
+                            "name": s.name,
+                            "lux": s.light_level_lux,
+                            "valid": s.light_level_valid,
+                        }
+                        for s in sensors
+                    ]
+                )
             )
             return
 
@@ -1027,15 +1160,17 @@ def contact() -> None:
 
         if _json_output:
             _out.print_json(
-                _json.dumps([
-                    {
-                        "id": s.id,
-                        "name": s.name,
-                        "closed": s.contact,
-                        "reachable": s.is_reachable,
-                    }
-                    for s in sensors
-                ])
+                _json.dumps(
+                    [
+                        {
+                            "id": s.id,
+                            "name": s.name,
+                            "closed": s.contact,
+                            "reachable": s.is_reachable,
+                        }
+                        for s in sensors
+                    ]
+                )
             )
             return
 
