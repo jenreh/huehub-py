@@ -24,7 +24,9 @@ def hue_config(fake_bridge: FakeBridge) -> HueConfig:
 
 
 @pytest.fixture(autouse=True)
-def isolated_cache_dir(tmp_path: pytest.TempPathFactory, monkeypatch: pytest.MonkeyPatch) -> None:
+def isolated_cache_dir(
+    tmp_path: pytest.TempPathFactory, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Ensure tests don't overwrite the real user cache by mocking the config root."""
     cache = tmp_path / "cache"
 
@@ -34,7 +36,10 @@ def isolated_cache_dir(tmp_path: pytest.TempPathFactory, monkeypatch: pytest.Mon
     # Must mock inside huehub.config directly since it does `from platformdirs import user_cache_dir`
     import huehub.cache
     import huehub.config
+
     monkeypatch.setattr(huehub.config, "user_cache_dir", fake_user_cache_dir)
     monkeypatch.setenv("HUE_TLS_MODE", "skip")
+
+
 #    monkeypatch.setenv("HUE_BRIDGE_HOST", "192.168.1.1")
 #    monkeypatch.setenv("HUE_APPLICATION_KEY", "test-app-key")
