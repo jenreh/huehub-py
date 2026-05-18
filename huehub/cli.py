@@ -909,21 +909,6 @@ def activate(
     _run(_do())
 
 
-@scenes_app.command()
-def deactivate(
-    name: Annotated[str, typer.Argument()],
-    room: Annotated[str | None, typer.Option("--room")] = None,
-) -> None:
-    """Deactivate a scene."""
-
-    async def _do() -> None:
-        async with _get_client() as client:
-            await client.deactivate_scene(name, group=room)
-        _err.print(f"[green]Scene '{name}' deactivated.[/green]")
-
-    _run(_do())
-
-
 # ---------------------------------------------------------------------------
 # Devices sub-commands
 # ---------------------------------------------------------------------------

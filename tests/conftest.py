@@ -35,3 +35,6 @@ def isolated_cache_dir(tmp_path: pytest.TempPathFactory, monkeypatch: pytest.Mon
     import huehub.cache
     import huehub.config
     monkeypatch.setattr(huehub.config, "user_cache_dir", fake_user_cache_dir)
+    monkeypatch.setenv("HUE_TLS_MODE", "skip")
+#    monkeypatch.setenv("HUE_BRIDGE_HOST", "192.168.1.1")
+#    monkeypatch.setenv("HUE_APPLICATION_KEY", "test-app-key")

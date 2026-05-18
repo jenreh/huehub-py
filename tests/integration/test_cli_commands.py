@@ -101,10 +101,6 @@ class TestScenesCommands:
         result = _invoke("scenes", "activate", "Relax", "--room", "Living Room")
         assert result.exit_code == 0
 
-    def test_scenes_deactivate(self) -> None:
-        result = _invoke("scenes", "deactivate", "Relax", "--room", "Living Room")
-        assert result.exit_code == 0
-
 
 class TestSensorsCommands:
     def test_sensors_list(self) -> None:
