@@ -1,23 +1,33 @@
 {
-    "permissions": {
-        "defaultMode": "acceptEdits",
-        "allow": [
-            "Bash(python)",
-            "Bash(python *)",
-            "Bash(python3)",
-            "Bash(python3 *)",
-            "Bash(pytest)",
-            "Bash(pytest *)",
-            "Bash(pip)",
-            "Bash(pip *)",
-            "Bash(pip3)",
-            "Bash(pip3 *)",
-            "Bash(uv)",
-            "Bash(uv *)",
-            "Bash(poetry)",
-            "Bash(poetry *)",
-            "Bash(git stash *)",
-            "Bash(task *)"
-        ]
-    }
+  "permissions": {
+    "allow": [
+      "Bash(python)",
+      "Bash(python *)",
+      "Bash(python3)",
+      "Bash(python3 *)",
+      "Bash(pytest)",
+      "Bash(pytest *)",
+      "Bash(pip)",
+      "Bash(pip *)",
+      "Bash(pip3)",
+      "Bash(pip3 *)",
+      "Bash(uv)",
+      "Bash(uv *)",
+      "Bash(poetry)",
+      "Bash(poetry *)",
+      "Bash(git stash *)",
+      "Bash(task *)"
+    ],
+    "defaultMode": "acceptEdits"
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": false,
+    "context7@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": false,
+    "ralph-loop@claude-plugins-official": false,
+    "claude-code-setup@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": false
+  }
 }

@@ -3,6 +3,7 @@ __pypackages__/
 .cache
 .coverage
 .coverage.*
+.dirty
 .dmypy.json
 .DS_Store
 .eggs/
@@ -35,9 +36,13 @@ __pypackages__/
 *.bak
 *.cover
 *.db
+*.db
+*.db-shm
+*.db-wal
 *.egg
 *.egg-info/
 *.kv-env.*
+*.log
 *.log
 *.manifest
 *.mo
@@ -57,9 +62,16 @@ __pypackages__/
 *$py.class
 /site
 /vectorstore/
+# Cache
+# CodeGraph data files
+# Database
+# Hook markers
+# Logs
+# These are local to each machine and should not be committed
 aila-storage/
 assets/external/
 build/
+cache/
 celerybeat-schedule
 celerybeat.pid
 configuration/config.abaz009.yaml
