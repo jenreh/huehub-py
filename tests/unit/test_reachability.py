@@ -95,3 +95,15 @@ class TestClientReachability:
             lights = {lig.name: lig for lig in await hue.list_lights()}
         assert lights["Desk Lamp"].is_reachable is True
         assert lights["Floor Lamp"].is_reachable is False
+
+    async def test_zgp_connectivity_counts(
+        self, hue_config: HueConfig, httpx_mock: HTTPXMock, fake_bridge: FakeBridge
+    ) -> None:
+        zb = fake_bridge.zigbee_connectivity.pop(1)
+        zb["type"] = "zgp_connectivity"
+        zb["status"] = "disconnected"
+        fake_bridge.zigbee_connectivity.append(zb)
+        fake_bridge.setup_mocks(httpx_mock)
+        async with HueBridgeClient(hue_config) as hue:
+            lights = {lig.name: lig for lig in await hue.list_lights()}
+        assert lights["Floor Lamp"].is_reachable is False

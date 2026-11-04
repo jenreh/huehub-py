@@ -820,7 +820,9 @@ def _parse_all_resources(raw_list: list[dict]) -> AllResources:
     raw_ll = by_type.get("light_level", [])
     raw_contact = by_type.get("contact", [])
     raw_entertainment = by_type.get("entertainment", [])
-    conn = build_connectivity_by_device(by_type.get("zigbee_connectivity", []))
+    conn = build_connectivity_by_device(
+        by_type.get("zigbee_connectivity", []) + by_type.get("zgp_connectivity", [])
+    )
 
     lights = tuple(parse_light(r, conn) for r in raw_lights)
     lights_by_device = build_lights_by_device(raw_lights)

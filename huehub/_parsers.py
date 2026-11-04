@@ -30,10 +30,11 @@ log = logging.getLogger(__name__)
 
 
 def build_connectivity_by_device(raw_zigbee: list[dict]) -> dict[str, str]:
-    """Map device ID to its ``zigbee_connectivity`` status.
+    """Map device ID to its connectivity status.
 
     Args:
-        raw_zigbee: Raw ``zigbee_connectivity`` resource dicts.
+        raw_zigbee: Raw ``zigbee_connectivity`` and ``zgp_connectivity``
+            (Zigbee Green Power) resource dicts; both share the same status values.
 
     Returns:
         Dict of device UUID to status (e.g. ``"connected"``).
