@@ -24,6 +24,7 @@ from collections.abc import AsyncIterator
 import httpx
 
 from huehub._parsers import (
+    build_connectivity_by_device,
     build_lights_by_device,
     parse_contact,
     parse_device,
@@ -819,8 +820,9 @@ def _parse_all_resources(raw_list: list[dict]) -> AllResources:
     raw_ll = by_type.get("light_level", [])
     raw_contact = by_type.get("contact", [])
     raw_entertainment = by_type.get("entertainment", [])
+    conn = build_connectivity_by_device(by_type.get("zigbee_connectivity", []))
 
-    lights = tuple(parse_light(r) for r in raw_lights)
+    lights = tuple(parse_light(r, conn) for r in raw_lights)
     lights_by_device = build_lights_by_device(raw_lights)
     lights_by_id = {lid: lid for lid in lights_by_device.values()}
 
@@ -837,9 +839,13 @@ def _parse_all_resources(raw_list: list[dict]) -> AllResources:
         scenes=tuple(parse_scene(r) for r in raw_scenes),
         devices=tuple(parse_device(r) for r in raw_devices),
         grouped_lights=grouped_lights,
-        motion_sensors=tuple(parse_motion(r, raw_devices) for r in raw_motion),
-        temperature_sensors=tuple(parse_temperature(r, raw_devices) for r in raw_temp),
-        light_level_sensors=tuple(parse_light_level(r, raw_devices) for r in raw_ll),
-        contact_sensors=tuple(parse_contact(r, raw_devices) for r in raw_contact),
+        motion_sensors=tuple(parse_motion(r, raw_devices, conn) for r in raw_motion),
+        temperature_sensors=tuple(
+            parse_temperature(r, raw_devices, conn) for r in raw_temp
+        ),
+        light_level_sensors=tuple(
+            parse_light_level(r, raw_devices, conn) for r in raw_ll
+        ),
+        contact_sensors=tuple(parse_contact(r, raw_devices, conn) for r in raw_contact),
         entertainment_zones=tuple(parse_entertainment(r) for r in raw_entertainment),
     )

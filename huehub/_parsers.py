@@ -25,15 +25,56 @@ log = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
+# Connectivity
+# ---------------------------------------------------------------------------
+
+
+def build_connectivity_by_device(raw_zigbee: list[dict]) -> dict[str, str]:
+    """Map device ID to its ``zigbee_connectivity`` status.
+
+    Args:
+        raw_zigbee: Raw ``zigbee_connectivity`` resource dicts.
+
+    Returns:
+        Dict of device UUID to status (e.g. ``"connected"``).
+    """
+    result: dict[str, str] = {}
+    for item in raw_zigbee:
+        device_id = (item.get("owner") or {}).get("rid")
+        if device_id and item.get("status"):
+            result[device_id] = item["status"]
+    return result
+
+
+def is_reachable_status(status: str | None) -> bool:
+    """Return whether a ``zigbee_connectivity`` status counts as reachable.
+
+    Devices without a Zigbee connectivity resource are treated as reachable.
+
+    Args:
+        status: The connectivity status, or ``None`` if unknown.
+
+    Returns:
+        ``True`` if connected or unknown, otherwise ``False``.
+    """
+    return status is None or status == "connected"
+
+
+def _reachable(device_id: str, connectivity: dict[str, str] | None) -> bool:
+    return is_reachable_status((connectivity or {}).get(device_id))
+
+
+# ---------------------------------------------------------------------------
 # Light
 # ---------------------------------------------------------------------------
 
 
-def parse_light(raw: dict) -> Light:
+def parse_light(raw: dict, connectivity: dict[str, str] | None = None) -> Light:
     """Parse a CLIP v2 ``light`` resource dict.
 
     Args:
         raw: Single item from the bridge ``data`` array.
+        connectivity: Device UUID to ``zigbee_connectivity`` status.
 
     Returns:
         A :class:`~huehub.models.Light` dataclass.
@@ -70,16 +111,11 @@ def parse_light(raw: dict) -> Light:
     elif brightness is not None:
         color_mode = "brightness"
 
-    # Reachability sits on the device, not the light resource itself.
-    # We use the "status" field as a proxy when available.
-    status = raw.get("status") or {}
-    is_reachable = status.get("reachability") != "disconnected"
-
     return Light(
         id=raw.get("id", ""),
         name=meta.get("name", raw.get("name", "")),
         is_on=bool(is_on),
-        is_reachable=is_reachable,
+        is_reachable=_reachable(owner.get("rid", ""), connectivity),
         brightness=float(brightness) if brightness is not None else None,
         color_xy=color_xy,
         color_temp_mirek=color_temp_mirek,
@@ -287,12 +323,17 @@ def parse_device(raw: dict) -> Device:
 # ---------------------------------------------------------------------------
 
 
-def parse_motion(raw: dict, devices: list[dict]) -> MotionSensor:
+def parse_motion(
+    raw: dict,
+    devices: list[dict],
+    connectivity: dict[str, str] | None = None,
+) -> MotionSensor:
     """Parse a ``motion`` resource dict.
 
     Args:
         raw: Single item from the bridge ``data`` array.
         devices: Raw device dicts used to resolve the sensor name.
+        connectivity: Device UUID to ``zigbee_connectivity`` status.
 
     Returns:
         A :class:`~huehub.models.MotionSensor` dataclass.
@@ -306,7 +347,7 @@ def parse_motion(raw: dict, devices: list[dict]) -> MotionSensor:
     return MotionSensor(
         id=raw.get("id", ""),
         name=name,
-        is_reachable=(raw.get("enabled", True)),
+        is_reachable=_reachable(device_id, connectivity),
         motion_detected=bool(motion_obj.get("motion", False)),
         motion_valid=bool(motion_obj.get("motion_valid", False)),
         sensitivity=sensitivity_obj.get("sensitivity"),
@@ -314,12 +355,17 @@ def parse_motion(raw: dict, devices: list[dict]) -> MotionSensor:
     )
 
 
-def parse_temperature(raw: dict, devices: list[dict]) -> TemperatureSensor:
+def parse_temperature(
+    raw: dict,
+    devices: list[dict],
+    connectivity: dict[str, str] | None = None,
+) -> TemperatureSensor:
     """Parse a ``temperature`` resource dict.
 
     Args:
         raw: Single item from the bridge ``data`` array.
         devices: Raw device dicts used to resolve the sensor name.
+        connectivity: Device UUID to ``zigbee_connectivity`` status.
 
     Returns:
         A :class:`~huehub.models.TemperatureSensor` dataclass.
@@ -332,19 +378,24 @@ def parse_temperature(raw: dict, devices: list[dict]) -> TemperatureSensor:
     return TemperatureSensor(
         id=raw.get("id", ""),
         name=name,
-        is_reachable=bool(raw.get("enabled", True)),
+        is_reachable=_reachable(device_id, connectivity),
         temperature_celsius=temp_obj.get("temperature"),
         temperature_valid=bool(temp_obj.get("temperature_valid", False)),
         device_id=device_id,
     )
 
 
-def parse_light_level(raw: dict, devices: list[dict]) -> LightLevelSensor:
+def parse_light_level(
+    raw: dict,
+    devices: list[dict],
+    connectivity: dict[str, str] | None = None,
+) -> LightLevelSensor:
     """Parse a ``light_level`` resource dict.
 
     Args:
         raw: Single item from the bridge ``data`` array.
         devices: Raw device dicts used to resolve the sensor name.
+        connectivity: Device UUID to ``zigbee_connectivity`` status.
 
     Returns:
         A :class:`~huehub.models.LightLevelSensor` dataclass.
@@ -357,19 +408,24 @@ def parse_light_level(raw: dict, devices: list[dict]) -> LightLevelSensor:
     return LightLevelSensor(
         id=raw.get("id", ""),
         name=name,
-        is_reachable=bool(raw.get("enabled", True)),
+        is_reachable=_reachable(device_id, connectivity),
         light_level_lux=ll_obj.get("light_level"),
         light_level_valid=bool(ll_obj.get("light_level_valid", False)),
         device_id=device_id,
     )
 
 
-def parse_contact(raw: dict, devices: list[dict]) -> ContactSensor:
+def parse_contact(
+    raw: dict,
+    devices: list[dict],
+    connectivity: dict[str, str] | None = None,
+) -> ContactSensor:
     """Parse a ``contact`` resource dict.
 
     Args:
         raw: Single item from the bridge ``data`` array.
         devices: Raw device dicts used to resolve the sensor name.
+        connectivity: Device UUID to ``zigbee_connectivity`` status.
 
     Returns:
         A :class:`~huehub.models.ContactSensor` dataclass.
@@ -389,7 +445,7 @@ def parse_contact(raw: dict, devices: list[dict]) -> ContactSensor:
     return ContactSensor(
         id=raw.get("id", ""),
         name=name,
-        is_reachable=bool(raw.get("enabled", True)),
+        is_reachable=_reachable(device_id, connectivity),
         contact=contact,
         device_id=device_id,
     )
