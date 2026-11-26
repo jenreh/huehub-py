@@ -33,7 +33,6 @@ _LIGHT_1: dict[str, Any] = {
     "color": {"xy": {"x": 0.3127, "y": 0.3290}},
     "color_temperature": {"mirek": 370},
     "owner": {"rid": "dddd0000-0000-0000-0000-000000000001", "rtype": "device"},
-    "status": {"reachability": "connected"},
     "effects": {"effect_values": ["candle", "fire"]},
 }
 
@@ -45,7 +44,6 @@ _LIGHT_2: dict[str, Any] = {
     "dimming": {"brightness": 0.0},
     "color_temperature": {"mirek": 300},
     "owner": {"rid": "dddd0000-0000-0000-0000-000000000002", "rtype": "device"},
-    "status": {"reachability": "connected"},
     "effects": {"effect_values": []},
 }
 
@@ -71,6 +69,20 @@ _DEVICE_2: dict[str, Any] = {
         "product_name": "Hue White and color ambiance",
     },
     "services": [{"rid": "aaaa0000-0000-0000-0000-000000000002", "rtype": "light"}],
+}
+
+_ZIGBEE_1: dict[str, Any] = {
+    "id": "zbzb0000-0000-0000-0000-000000000001",
+    "type": "zigbee_connectivity",
+    "owner": {"rid": "dddd0000-0000-0000-0000-000000000001", "rtype": "device"},
+    "status": "connected",
+}
+
+_ZIGBEE_2: dict[str, Any] = {
+    "id": "zbzb0000-0000-0000-0000-000000000002",
+    "type": "zigbee_connectivity",
+    "owner": {"rid": "dddd0000-0000-0000-0000-000000000002", "rtype": "device"},
+    "status": "connected",
 }
 
 _GROUPED_LIGHT: dict[str, Any] = {
@@ -191,6 +203,10 @@ class FakeBridge:
         self.host = host
         self.lights: list[dict] = [deepcopy(_LIGHT_1), deepcopy(_LIGHT_2)]
         self.devices: list[dict] = [deepcopy(_DEVICE_1), deepcopy(_DEVICE_2)]
+        self.zigbee_connectivity: list[dict] = [
+            deepcopy(_ZIGBEE_1),
+            deepcopy(_ZIGBEE_2),
+        ]
         self.rooms: list[dict] = [deepcopy(_ROOM)]
         self.zones: list[dict] = [deepcopy(_ZONE)]
         self.grouped_lights: list[dict] = [
@@ -215,6 +231,7 @@ class FakeBridge:
         return (
             self.lights
             + self.devices
+            + self.zigbee_connectivity
             + self.rooms
             + self.zones
             + self.grouped_lights
